@@ -24,6 +24,10 @@ function Jiffy (HTMLMediaElement, timingArray) {
   this.player.addEventListener("suspend", eventCheckCancel);
   this.player.addEventListener("abort", eventCheckCancel);
 
+  // TODO:
+  // Add listener for completing audio and load next one.
+  // Might want to use existing playlist functionality in order to take advantage of buffering
+
   // timingArray should be an array of objects like:
   /* {
       "url": "http://media_file_url.mp4",
@@ -34,15 +38,13 @@ function Jiffy (HTMLMediaElement, timingArray) {
         "_ub8": {"start": 1.280, "end": 2.040 },
         "_ub9": {"start": 2.040, "end": 2.160 }
     } }
-
-    TODO: We should probably check timingArray to make sure it is formed right
-    TODO: And check that HTMLMediaElement is actually an HTMLMediaElement
   */
   timingArray.forEach(function(timingObj){
     this.addTimingObj(timingObj);
   });
 
   // quick sanity check
+  // TODO: Check that HTMLMediaElement is actually an HTMLMediaElement
   this.checkTimingObj = function(timingObj){
     try {
      return timingObj.url && timingObj.length_seconds && timingObj.times.length;
@@ -54,7 +56,6 @@ function Jiffy (HTMLMediaElement, timingArray) {
     if (!this.checkTimingObj(timingObj)) {
       console.log("Error, malformed timing object: ", timingObj); return;
     }
-
     // build and store fileToken
     var time_increment = 0;
     if (this.fileList.length) time_increment = this.fileList.last().start + this.fileList.last().len;
@@ -63,7 +64,6 @@ function Jiffy (HTMLMediaElement, timingArray) {
       url: timingObj.url, fileref: fileref,
       start: time_increment, len: timingObj.length_seconds, end: time_increment+timingObj.length_seconds };
     this.fileList.push(fileToken);
-
     // add times to events list and time queue
     Object.keys(timingObj).forEach(function(token, id) {
       // token object looks like: _ub7: {start: 1.000, end: 1.280, fileref: 0 }
